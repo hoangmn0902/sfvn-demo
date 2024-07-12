@@ -1,0 +1,79 @@
+# Set master image
+FROM php:8.1-fpm-alpine
+
+# RUN apk add --no-cache zip unzip curl supervisor  libzip-dev
+
+# Installing bash
+# RUN apk add bash
+
+# Installing PHP
+# RUN apk add --no-cache php8 \
+#     php8-common \
+#     php8-fpm \
+#     php8-pdo \
+#     php8-opcache \
+#     php8-zip \
+#     php8-phar \
+#     php8-iconv \
+#     php8-cli \
+#     php8-curl \
+#     php8-openssl \
+#     php8-mbstring \
+#     php8-tokenizer \
+#     php8-fileinfo \
+#     php8-json \
+#     php8-xml \
+#     php8-xmlwriter \
+#     php8-simplexml \
+#     php8-dom \
+#     php8-pdo_mysql \
+#     php8-pdo_sqlite \
+#     php8-tokenizer \
+#     php8-pecl-redis \
+#     php8-gd
+
+RUN apk add --no-cache \
+    curl \
+    supervisor \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    libzip-dev \
+    zip \
+    unzip \
+    icu-dev \
+    bash \
+    postgresql-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) pdo pdo_mysql pdo_pgsql gd zip intl bcmath
+
+
+# RUN apk add icu-dev 
+# RUN docker-php-ext-install mysqli pdo pdo_mysql
+# RUN docker-php-ext-configure intl && docker-php-ext-install intl
+# RUN docker-php-ext-configure zip
+# RUN docker-php-ext-install zip
+# RUN docker-php-ext-configure gd --with-jpeg --with-webp --with-freetype
+# RUN docker-php-ext-install gd
+
+RUN rm -rf /usr/bin/php
+RUN ln -s /usr/bin/php8 /usr/bin/php
+
+# Cài đặt Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Copy existing application directory
+# COPY ./laravel_src /var/www/html/
+
+# Phân quyền
+RUN chown -R www-data:www-data /var/www/html/
+
+# Chạy các lệnh artisan cần thiết
+# RUN php artisan config:cache
+# RUN php artisan route:cache
+# RUN php artisan view:cache
+
+#ko copy ./laravel_src thi khoi chay may lenh artisan, composer install (doan' vay)
